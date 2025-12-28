@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+  }
+  
+  * {
+    @apply border-gray-700;
+  }
+  
+  body {
+    @apply bg-background-primary text-text-primary antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-background-secondary rounded-lg border border-gray-700 p-6 shadow-lg;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:border-accent-gold/50;
+  }
+  
+  .btn-primary {
+    @apply bg-accent-gold hover:bg-accent-goldHover text-background-primary font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-background-tertiary hover:bg-gray-600 text-text-primary font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .input-field {
+    @apply bg-background-tertiary border border-gray-600 rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-gold focus:border-transparent;
+  }
+  
+  .metric-card {
+    @apply card card-hover;
+  }
+  
+  .price-up {
+    @apply text-success;
+  }
+  
+  .price-down {
+    @apply text-error;
+  }
+  
+  .glassmorphism {
+    @apply bg-background-secondary/80 backdrop-blur-sm border border-gray-700/50;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent-gold to-accent-goldLight bg-clip-text text-transparent;
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
+  
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}

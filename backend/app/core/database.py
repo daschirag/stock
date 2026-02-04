@@ -2,6 +2,7 @@
 Database connection and session management.
 """
 from typing import AsyncGenerator
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -10,6 +11,9 @@ from app.core.logging import get_logger
 
 
 logger = get_logger(__name__)
+
+# Set to False if init_db() fails (e.g. no PostgreSQL running). App still starts.
+db_available = True
 
 
 # Convert postgres:// to postgresql+asyncpg://
@@ -56,15 +60,18 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initialize database connection."""
+    """Initialize database connection. Does not raise if DB is unavailable (e.g. no PostgreSQL)."""
+    global db_available
     try:
         async with engine.begin() as conn:
-            # Test connection
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         logger.info("Database connection established successfully")
     except Exception as e:
-        logger.error(f"Failed to connect to database: {e}")
-        raise
+        db_available = False
+        logger.warning(
+            "Database unavailable (app will start anyway; DB endpoints will fail until PostgreSQL is running): %s",
+            e,
+        )
 
 
 async def close_db() -> None:

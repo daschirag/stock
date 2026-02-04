@@ -67,7 +67,7 @@ async def websocket_prices(websocket: WebSocket):
             price_data = {
                 "timestamp": datetime.now().isoformat(),
                 "symbol": "WTI",
-                "price": 75.42 + (asyncio.get_event_loop().time() % 10 - 5) * 0.5,
+                "price": 75.42 + (asyncio.get_running_loop().time() % 10 - 5) * 0.5,
                 "change": 1.23,
                 "change_percent": 1.65
             }

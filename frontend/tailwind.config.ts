@@ -20,7 +20,7 @@ const config: Config = {
                     goldLight: '#fbbf24',  // Amber-400
                 },
                 text: {
-                    primary: '#f8faf c',   // Slate-50
+                    primary: '#f8fafc',   // Slate-50
                     secondary: '#cbd5e1',  // Slate-300
                     muted: '#94a3b8',      // Slate-400
                 },

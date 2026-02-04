@@ -67,3 +67,35 @@ class SentimentResponse(BaseModel):
     aggregated_score: float
     source_count: int
     top_headlines: List[str]
+
+
+class KeyLevelsResponse(BaseModel):
+    """Support and resistance levels."""
+    support_1: float
+    support_2: float
+    resistance_1: float
+    resistance_2: float
+    pivot: float
+
+
+class AIInsightsResponse(BaseModel):
+    """AI-generated market insights."""
+    summary: str
+    key_drivers: List[str]
+    key_levels: KeyLevelsResponse
+    technical_summary: str
+    outlook: str  # bullish / bearish / neutral
+    confidence_score: float  # 0-1
+
+
+class CalendarEvent(BaseModel):
+    """Economic calendar event."""
+    date: str
+    title: str
+    impact: str  # high / medium / low
+    description: Optional[str] = None
+
+
+class EconomicCalendarResponse(BaseModel):
+    """Upcoming economic events."""
+    events: List[CalendarEvent]

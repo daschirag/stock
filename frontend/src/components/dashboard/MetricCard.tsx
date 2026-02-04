@@ -13,7 +13,7 @@ interface MetricCardProps {
 
 export default function MetricCard({ title, value, change, subtitle, icon }: MetricCardProps) {
     const hasChange = change !== undefined
-    const isPriceUp = change && change >= 0
+    const isPriceUp = change !== undefined && change >= 0
 
     return (
         <div className="metric-card animate-slide-up">

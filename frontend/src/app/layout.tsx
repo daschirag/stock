@@ -16,9 +16,9 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en" className="dark" suppressHydrationWarning>
             <body className={inter.className}>
-                <div className="min-h-screen bg-background-primary">
+                <div className="min-h-screen bg-background-primary layout-root">
                     {children}
                 </div>
             </body>

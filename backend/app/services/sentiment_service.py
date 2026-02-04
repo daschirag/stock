@@ -283,28 +283,27 @@ class SentimentService:
         Returns:
             Dictionary with aggregated metrics
         """
-        from sqlalchemy import func, and_
+        from sqlalchemy import text
         
         start_date = datetime.now() - timedelta(days=days_back)
         
-        query = await db.execute(
-            f"""
+        stmt = text("""
             SELECT 
                 AVG(sentiment_score * credibility_weight) as weighted_avg,
                 COUNT(*) as count,
                 AVG(sentiment_score) as simple_avg
             FROM sentiment_data
-            WHERE timestamp >= '{start_date.isoformat()}'
-            """
-        )
+            WHERE timestamp >= :start_date
+        """)
         
-        result = query.fetchone()
+        result = await db.execute(stmt, {"start_date": start_date})
+        row = result.mappings().first()
         
-        if result and result[0] is not None:
+        if row and row["weighted_avg"] is not None:
             aggregated = {
-                "weighted_average": float(result[0]),
-                "simple_average": float(result[2]),
-                "article_count": int(result[1])
+                "weighted_average": float(row["weighted_avg"]),
+                "simple_average": float(row["simple_avg"]) if row["simple_avg"] is not None else 0.0,
+                "article_count": int(row["count"])
             }
         else:
             aggregated = {

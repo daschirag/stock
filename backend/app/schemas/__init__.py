@@ -9,6 +9,10 @@ from app.schemas.request_response import (
     TechnicalIndicatorData,
     ModelMetricsResponse,
     SentimentResponse,
+    KeyLevelsResponse,
+    AIInsightsResponse,
+    CalendarEvent,
+    EconomicCalendarResponse,
 )
 
 
@@ -20,4 +24,8 @@ __all__ = [
     "TechnicalIndicatorData",
     "ModelMetricsResponse",
     "SentimentResponse",
+    "KeyLevelsResponse",
+    "AIInsightsResponse",
+    "CalendarEvent",
+    "EconomicCalendarResponse",
 ]

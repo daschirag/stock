@@ -1,201 +1,210 @@
 # Crude Oil Price Prediction System
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.108+-green.svg)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **AI-powered crude oil price forecasting with hybrid ML models**
+> **AI-powered crude oil price forecasting** — Hybrid ML models, real-time data, and a professional dashboard.
 
-Sophisticated prediction platform combining BiLSTM-Attention, CNN-LSTM, and XGBoost models with real-time data pipelines and professional web interface.
-
----
-
-## 🎯 Features
-
-- **Hybrid ML Models**: BiLSTM-Attention + CNN-LSTM + XGBoost ensemble
-- **VMD Decomposition**: Variational Mode Decomposition for frequency analysis
-- **Real-time Updates**: WebSocket integration for live price feeds
-- **Sentiment Analysis**: News-based market sentiment tracking
-- **Technical Indicators**: Ichimoku Cloud, RSI, MACD, Bollinger Bands
-- **Confidence Intervals**: 95% prediction confidence bounds
-- **Modern UI**: Next.js 15 dashboard with interactive charts
-- **TimescaleDB**: Optimized time-series data storage
+Sophisticated prediction platform combining **BiLSTM-Attention**, **CNN-LSTM**, and **XGBoost** with VMD decomposition, sentiment analysis, technical indicators, and a modern Next.js 15 UI. Works with or without PostgreSQL; uses mock data when the database is unavailable.
 
 ---
 
-## 🚀 Quick Start
+## Features
 
-### Option 1: Docker (Recommended)
+### Backend
+- **Hybrid ML models**: BiLSTM-Attention + CNN-LSTM + XGBoost ensemble with Bayesian weighting
+- **VMD decomposition**: Variational Mode Decomposition for frequency analysis
+- **Real-time WebSocket**: Live price and prediction feeds
+- **Sentiment analysis**: News-based market sentiment
+- **Technical indicators**: Ichimoku Cloud, RSI, MACD, Bollinger Bands
+- **95% confidence intervals** on predictions
+- **Graceful fallback**: Runs without PostgreSQL; endpoints return mock/empty data when DB is unavailable
+- **TimescaleDB-ready**: Optimized time-series storage when DB is configured
+
+### Frontend
+- **Live price banner**: Real-time WTI/Brent via WebSocket (fallback to REST polling)
+- **Interactive charts**: Candlestick and sparklines
+- **AI-style insights**: Market summary, key drivers, technical summary, price outlook
+- **Key levels**: Support, resistance, pivot points
+- **Economic calendar**: Upcoming events relevant to oil markets
+- **News headlines**: Top headlines affecting oil
+- **Watchlist**: WTI vs Brent side-by-side
+- **Multi-horizon predictions**: 1-day, 7-day, 30-day with refresh
+- **Sentiment gauge**, **volatility badge**, **opportunity meter**
+- **Price alerts**: Set and manage alerts (stored in browser)
+- **Quick stats**: 52-week high/low, session range
+- **Export**: Download data as CSV
+- **Theme toggle**: Dark / light mode
+- **Glossary**: Expandable crude oil trading terms
+- **Responsive**: Mobile-friendly layout
+
+---
+
+## Quick Start
+
+### Option 1: Docker (recommended)
 
 ```bash
-# Clone repository
-git clone <repository-url>
+git clone https://github.com/AbhayZ1/Crude_oil_pred.git
 cd Crude_oil_pred
 
-# Start all services
 ./start.sh
-
-# Or manually with Docker Compose
-docker-compose up -d --build
+# or: docker-compose up -d --build
 ```
 
-**Access:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- **Frontend**: http://localhost:3000  
+- **Backend API**: http://localhost:8000  
+- **API docs**: http://localhost:8000/docs  
 
-### Option 2: Local Development
+### Option 2: Local development
 
-**Prerequisites:**
-- PostgreSQL 16+ with TimescaleDB
-- Python 3.11+
-- Node.js 18+ or Bun 1.0+
+**Prerequisites:** Python 3.12+, Node.js 18+ (or Bun), and optionally PostgreSQL 16+ with TimescaleDB.
 
 ```bash
-# 1. Setup database
+git clone https://github.com/AbhayZ1/Crude_oil_pred.git
+cd Crude_oil_pred
+```
+
+**Backend (runs without DB; uses mock data if DB is not available):**
+
+```bash
+cd backend
+uv venv && uv sync
+uv run uvicorn app.main:app --reload
+```
+
+**Frontend (new terminal):**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Optional — database:**  
+If you use PostgreSQL, create the DB and run the schema:
+
+```bash
+# Create DB and load schema (Linux/macOS example)
 sudo -u postgres psql -c "CREATE DATABASE crude_oil_db;"
 sudo -u postgres psql crude_oil_db < backend/init.sql
-
-# 2. Backend setup
-cd backend
-uv sync  # or: pip install -r requirements.txt
-uv run uvicorn app.main:app --reload
-
-# 3. Frontend setup (new terminal)
-cd frontend
-bun install  # or: npm install
-bun run dev  # or: npm run dev
 ```
+
+Set `DATABASE_URL` in `.env` (see Configuration).
 
 ---
 
-## 📊 Architecture
+## Architecture
 
 ```
 ┌─────────────────┐
-│   Next.js 15    │  Frontend (React 19 + TailwindCSS)
-│   Dashboard     │  
+│   Next.js 15    │  React 19, TailwindCSS, Framer Motion
+│   Dashboard     │  useLivePrice → WebSocket / REST fallback
 └────────┬────────┘
-         │ HTTP/WebSocket
-         ↓
+         │ HTTP / WebSocket
+         ▼
 ┌────────────────────────────────────────┐
 │         FastAPI Backend                │
-│  ┌──────────────────────────────────┐  │
-│  │  Data Pipeline                   │  │
-│  │  - Yahoo Finance (Oil Prices)    │  │
-│  │  - FRED API (Macro Indicators)   │  │
-│  │  - NewsAPI (Sentiment)           │  │
-│  └──────────────────────────────────┘  │
-│  ┌──────────────────────────────────┐  │
-│  │  ML Models                       │  │
-│  │  - BiLSTM-Attention (High-freq)  │  │
-│  │  - CNN-LSTM (Mid-freq)           │  │
-│  │  - XGBoost (Low-freq)            │  │
-│  │  - Ensemble (Bayesian weights)   │  │
-│  └──────────────────────────────────┘  │
+│  Data: Yahoo Finance, FRED, NewsAPI    │
+│  ML: BiLSTM-Attention, CNN-LSTM,       │
+│      XGBoost, VMD, Ensemble            │
+│  Insights, key levels, calendar       │
 └────────┬───────────────────────────────┘
-         │
-         ↓
+         │ (optional)
+         ▼
 ┌─────────────────┐
-│ PostgreSQL 16   │
-│ + TimescaleDB   │  Time-series database
+│ PostgreSQL 16   │  TimescaleDB for time-series
 └─────────────────┘
 ```
 
 ---
 
-## 🧠 ML Model Details
+## API Reference
 
-### Hybrid Ensemble Architecture
-
-**1. BiLSTM-Attention** (High-frequency IMFs)
-- 256 LSTM units, bidirectional
-- 8-head multi-head attention
-- Dropout: 0.2
-- Optimizer: Adam (lr=0.001)
-
-**2. CNN-LSTM** (Mid-frequency IMFs)
-- Conv1D: 64 filters, kernel=3
-- LSTM: 128 units
-- MaxPooling1D: pool_size=2
-
-**3. XGBoost** (Low-frequency IMFs & Trend)
-- 500 trees,  learning_rate=0.01
-- max_depth=5
-- Early stopping: 50 rounds
-
-**4. Ensemble Framework**
-- Bayesian weight optimization (Optuna)
-- 95% confidence intervals
-- Sentiment-adjusted predictions (±2%)
-
----
-
-## 📡 API Endpoints
+Base URL: `http://localhost:8000`  
+Interactive docs: http://localhost:8000/docs  
 
 ### Data
-- `GET /api/v1/data/latest` - Current price
-- `GET /api/v1/data/historical` - Historical prices
-- `POST /api/v1/data/fetch` - Trigger background fetch
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/data/latest` | Current price (mock if no DB) |
+| GET | `/api/v1/data/historical` | Historical prices |
+| POST | `/api/v1/data/fetch` | Trigger background fetch |
 
 ### Predictions
-- `POST /api/v1/predict` - Generate prediction
-- `GET /api/v1/predict/history` - Past predictions
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/predict` | Generate prediction |
+| GET | `/api/v1/predict/history` | Past predictions |
 
-### Technical Indicators
-- `GET /api/v1/indicators` - Get indicators
-- `POST /api/v1/indicators/calculate` - Calculate indicators
+### Insights & calendar
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/insights` | AI-style summary, drivers, outlook |
+| GET | `/api/v1/insights/key-levels` | Support, resistance, pivots |
+| GET | `/api/v1/calendar` | Economic calendar events |
 
-### Sentiment
-- `GET /api/v1/sentiment` - Aggregated sentiment
-- `POST /api/v1/sentiment/fetch` - Fetch news
+### Technical & sentiment
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/indicators` | Technical indicators |
+| POST | `/api/v1/indicators/calculate` | Calculate indicators |
+| GET | `/api/v1/sentiment` | Aggregated sentiment |
+| POST | `/api/v1/sentiment/fetch` | Fetch news sentiment |
 
 ### WebSockets
-- `WS /ws/prices` - Real-time price updates (every 5s)
-- `WS /ws/predictions` - Real-time predictions (every 30s)
+| Path | Description |
+|------|-------------|
+| `WS /api/v1/ws/prices` | Real-time prices (e.g. every 5s) |
+| `WS /api/v1/ws/predictions` | Real-time predictions |
 
 ### System
-- `GET /api/v1/health` - Health check
-
-Full API documentation: http://localhost:8000/docs
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/health` | Health check (DB-independent) |
 
 ---
 
-## 🗂️ Project Structure
+## Project structure
 
 ```
 Crude_oil_pred/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/endpoints/    # API routes
-│   │   ├── core/                # Config, logging, database
-│   │   ├── models/
-│   │   │   ├── db/              # SQLAlchemy models
-│   │   │   └── ml/              # ML models
-│   │   ├── schemas/             # Pydantic schemas
-│   │   └── services/            # Business logic
-│   ├── tests/                   # Integration tests
-│   ├── init.sql                 # Database schema
-│   └── pyproject.toml           # Dependencies
+│   │   ├── api/v1/endpoints/   # health, historical, predict, sentiment, websocket, insights
+│   │   ├── core/               # config, logging, database (graceful no-DB)
+│   │   ├── models/db/          # SQLAlchemy models
+│   │   ├── models/ml/          # BiLSTM-Attention, CNN-LSTM, XGBoost, ensemble
+│   │   ├── schemas/            # Pydantic request/response
+│   │   └── services/           # data, prediction, sentiment, technical_indicators, etc.
+│   ├── tests/
+│   ├── init.sql
+│   └── pyproject.toml
 ├── frontend/
 │   ├── src/
-│   │   ├── app/                 # Next.js app router
-│   │   └── components/          # React components
+│   │   ├── app/                # layout, page, globals.css
+│   │   ├── components/
+│   │   │   ├── charts/         # PriceChart, Sparkline
+│   │   │   └── dashboard/      # AIInsights, KeyLevels, Watchlist, SentimentGauge, etc.
+│   │   └── hooks/              # useLivePrice (WebSocket + REST fallback)
 │   ├── package.json
 │   └── tailwind.config.ts
 ├── docker-compose.yml
-├── start.sh                     # Quick start script
+├── start.sh / stop.sh
+├── .env.example
 └── README.md
 ```
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
-### Environment Variables
+Copy `.env.example` to `.env` and adjust as needed.
 
-**Backend** (`.env`):
+**Backend (`.env`):**
+
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/crude_oil_db
 API_KEY_FRED=your_fred_api_key
@@ -204,159 +213,70 @@ LOG_LEVEL=INFO
 MODEL_VERSION=v1.0.0
 ```
 
-**Frontend** (`.env.local`):
+**Frontend (`.env.local`):**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_WS_URL=ws://localhost:8000
 ```
 
+If `DATABASE_URL` is missing or PostgreSQL is down, the backend still starts and serves mock/empty data where applicable.
+
 ---
 
-## 🧪 Testing
+## ML model summary
+
+- **BiLSTM-Attention**: High-frequency IMFs; 256 bidirectional LSTM units, 8-head attention.  
+- **CNN-LSTM**: Mid-frequency IMFs; Conv1D 64 filters, LSTM 128 units.  
+- **XGBoost**: Low-frequency IMFs and trend; 500 trees, early stopping.  
+- **Ensemble**: Bayesian weight optimization (Optuna), 95% confidence intervals, optional sentiment adjustment (±2%).
+
+---
+
+## Testing
 
 ```bash
-# Backend tests
+# Backend
 cd backend
 uv run pytest tests/ -v
 
-# Integration tests
+# Integration
 uv run pytest tests/test_integration.py -v
-
-# Frontend tests (when implemented)
-cd frontend
-bun test
 ```
 
 ---
 
-## 📈 Background Tasks
+## Docker
 
-Automatic scheduled tasks:
-- **Price Fetch**: Every hour (WTI + Brent)
-- **Technical Indicators**: Every 6 hours
-- **Sentiment Analysis**: Every 4 hours
-- **Predictions**: Every 12 hours
-
----
-
-## 🎨 Frontend Features
-
-- **Live Price Banner**: Real-time price with trend
-- **Interactive Charts**: Candlestick visualization
-- **Sentiment Gauge**: Circular progress indicator
-- **Metric Cards**: Key statistics display
-- **Dark Theme**: Professional slate + amber gold
-- **Responsive**: Mobile-friendly design
-
----
-
-## 🐳 Docker Deployment
-
-### Services
-
-- **postgres**: PostgreSQL 16 + TimescaleDB 2.13
-- **backend**: FastAPI application (port 8000)
-- **frontend**: Next.js application (port 3000)
-
-### Commands
+**Services:** `postgres` (PostgreSQL + TimescaleDB), `backend` (port 8000), `frontend` (port 3000).
 
 ```bash
-# Build and start
 docker-compose up -d --build
-
-# View logs
 docker-compose logs -f backend
-docker-compose logs -f frontend
-
-# Stop services
 docker-compose down
-
-# Clean volumes
-docker-compose down -v
 ```
 
 ---
 
-## 📝 Development
+## Contributing
 
-### Add New Endpoint
-
-1. Create endpoint in `backend/app/api/v1/endpoints/`
-2. Add schemas in `backend/app/schemas/`
-3. Create service logic in `backend/app/services/`
-4. Register router in `backend/app/api/v1/router.py`
-
-### Add New Component
-
-1. Create component in `frontend/src/components/`
-2. Import in page or layout
-3. Style with TailwindCSS classes
+1. Fork the repo  
+2. Create a branch (`git checkout -b feature/your-feature`)  
+3. Commit changes (`git commit -m 'Add your feature'`)  
+4. Push and open a Pull Request  
 
 ---
 
-## 🔒 Security
+## License
 
-- CORS configuration
-- API key protection
-- Input validation (Pydantic)
-- SQL injection prevention (SQLAlchemy ORM)
-- Rate limiting (production recommended)
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-## 📊 Performance
+## Acknowledgments
 
-### Optimization Features
-
-- Async I/O throughout
-- Connection pooling (SQLAlchemy)
-- Background task scheduling
-- Database indexing (TimescaleDB)
-- Efficient queries (time-series partitioning)
-
-### Benchmarks
-
-- API response: <100ms (cached)
-- Prediction generation: ~2s
-- WebSocket latency: <50ms
+FastAPI, Next.js, Lightweight Charts, TimescaleDB, Optuna, yfinance, and the open-source ML/data community.
 
 ---
 
-## 🤝 Contributing
-
-Contributions welcome! Please:
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file
-
----
-
-## 🙏 Acknowledgments
-
-- **FastAPI**: Modern Python web framework
-- **Next.js**: React meta-framework
-- **Lightweight Charts**: TradingView charting library
-- **TimescaleDB**: Time-series database
-- **Optuna**: Hyperparameter optimization
-
----
-
-## 📞 Support
-
-For issues or questions:
-- Open an issue on GitHub
-- Check API documentation at `/docs`
-- Review walkthrough documents in `/.gemini/brain/`
-
----
-
-**Built with ❤️ for financial forecasting**
+**Built for crude oil price forecasting and market insight.**

@@ -37,7 +37,8 @@ class TechnicalIndicatorService:
         gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
         
-        rs = gain / loss
+        # Avoid division by zero when loss is 0 (replace 0 with small value)
+        rs = gain / loss.replace(0, 1e-10)
         rsi = 100 - (100 / (1 + rs))
         
         return rsi

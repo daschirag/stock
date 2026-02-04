@@ -7,8 +7,8 @@ from typing import Dict, List, Tuple, Optional
 from datetime import datetime
 from decimal import Decimal
 
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 from app.core import settings, get_logger
 from app.models.db import OilPrice, TechnicalIndicator, Prediction, ModelMetadata
@@ -258,7 +258,7 @@ class TrainingService:
         
         # Deactivate previous models
         await db.execute(
-            "UPDATE model_metadata SET is_active = false WHERE is_active = true"
+            text("UPDATE model_metadata SET is_active = false WHERE is_active = true")
         )
         
         db.add(metadata)

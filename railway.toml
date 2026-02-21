@@ -1,8 +1,0 @@
-[build]
-builder = "NIXPACKS"
-
-[build.nixpacks]
-install_cmd = "pip install -r backend/requirements.txt"
-
-[deploy]
-startCommand = "python app/main.py"

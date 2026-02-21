@@ -67,6 +67,60 @@ git clone https://github.com/AbhayZ1/Crude_oil_pred.git
 cd Crude_oil_pred
 ```
 
+---
+
+### Deployment with Vercel
+
+The frontend and backend are treated as two separate projects when deploying.
+
+1. **Frontend (Next.js)**
+   * Import the repository into Vercel and set the root directory to `frontend/`.
+   * Vercel will automatically run `npm install` and `npm run build`.
+   * Configure an environment variable `NEXT_PUBLIC_API_URL` pointing to your backend URL.
+
+   A simple `vercel.json` placed in `frontend/` helps Vercel detect the build target:
+
+   ```json
+   // frontend/vercel.json
+   {
+     "version": 2,
+     "builds": [
+       { "src": "package.json", "use": "@vercel/next" }
+     ]
+   }
+   ```
+
+2. **Backend (FastAPI)**
+   * Deploy the backend as a Docker image using any host that supports containers (Render, Railway, etc.)
+     or as a separate Vercel project with the Docker builder.
+   * The existing `backend/Dockerfile` is already configured for production.
+   * If you choose Vercel, add a `vercel.json` file to `backend/` like this:
+
+   ```json
+   // backend/vercel.json
+   {
+     "version": 2,
+     "builds": [
+       { "src": "Dockerfile", "use": "@vercel/docker" }
+     ],
+     "routes": [
+       { "src": "\\/(.*)", "dest": "/app.main:app" }
+     ]
+   }
+   ```
+
+   * After deployment you will get a public URL such as `https://stock-backend.vercel.app`.
+
+3. **Connect the two**
+   * Set `NEXT_PUBLIC_API_URL` in the frontend project to your backend URL.
+   * Frontend rewrites (see `next.config.js`) will proxy `/api/*` requests accordingly.
+
+This separation mirrors your local development setup: two terminals, one for each service.
+
+---
+
+(This section may be removed or adjusted depending on where you host the backend.)
+
 **Backend (runs without DB; uses mock data if DB is not available):**
 
 ```bash
